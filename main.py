@@ -63,6 +63,9 @@ class App:
 
     def run(self) -> None:
         log.info("AI Is Not Art starting up")
+        if self._cfg.app.debug_mode:
+            log.info("[DEBUG MODE] Print disabled — images will load into kiosk at %s",
+                     self._cfg.app.kiosk_url)
         log.info(
             "Button GPIO %d, LED GPIO %d, stickers/run=%d",
             self._cfg.gpio.button_pin,
@@ -158,12 +161,16 @@ class App:
         ok = layout_and_print(good, cfg)
 
         # 5. Delete generated sticker files (layout files cleaned by _clear_tmp).
-        for p in good:
-            try:
-                p.unlink()
-                log.debug("Deleted %s", p)
-            except Exception as exc:
-                log.warning("Could not delete %s: %s", p, exc)
+        #    In debug mode keep them so they can be inspected.
+        if not cfg.app.debug_mode:
+            for p in good:
+                try:
+                    p.unlink()
+                    log.debug("Deleted %s", p)
+                except Exception as exc:
+                    log.warning("Could not delete %s: %s", p, exc)
+        else:
+            log.info("[DEBUG] Keeping generated images in %s for inspection", cfg.app.tmp_dir)
 
         return ok
 

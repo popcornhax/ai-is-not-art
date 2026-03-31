@@ -4,7 +4,8 @@ httpx>=0.27.0          # used by openai SDK; also for URL image download fallbac
 
 # Hardware (Pi only — these will fail gracefully on other platforms)
 gpiozero>=2.0
-RPi.GPIO>=0.7.1        # gpiozero backend for Raspberry Pi
+lgpio>=0.2.2           # preferred gpiozero backend on Pi OS Bookworm
+RPi.GPIO>=0.7.1        # gpiozero fallback backend
 rpi-ws281x>=5.0.0      # WS2812 LED driver (requires root for DMA)
 
 # Config

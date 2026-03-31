@@ -25,6 +25,8 @@ kp = 42
 tmp_dir = "/tmp/ai-is-not-art"
 log_file = "/home/sticker/ai-is-not-art/app.log"
 prompt_history_window = 10  # avoid repeating styles/concepts within this many runs
+debug_mode = false           # true = load into kiosk canvas instead of printing
+kiosk_url = "http://localhost:8000"  # PixCut kiosk API base URL (debug mode)
 
 [prompts]
 styles = [

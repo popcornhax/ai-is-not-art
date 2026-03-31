@@ -52,6 +52,8 @@ class AppConfig:
     tmp_dir: str = "/tmp/ai-is-not-art"
     log_file: str = "/home/sticker/ai-is-not-art/app.log"
     prompt_history_window: int = 10
+    debug_mode: bool = False
+    kiosk_url: str = "http://localhost:8000"
 
 
 @dataclass
