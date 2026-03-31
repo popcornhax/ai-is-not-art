@@ -2,7 +2,7 @@
 api_key = ""         # replace with your OpenAI API key
 model = "gpt-image-1"
 size = "1024x1024"
-timeout_s = 30
+timeout_s = 120
 retry_count = 2
 stickers_per_run = 3
 min_stickers_to_print = 1  # minimum successes required to proceed with print

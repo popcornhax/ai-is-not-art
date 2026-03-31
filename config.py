@@ -23,7 +23,7 @@ class OpenAIConfig:
     api_key: str = ""
     model: str = "gpt-image-1"
     size: str = "1024x1024"
-    timeout_s: int = 30
+    timeout_s: int = 120
     retry_count: int = 2
     stickers_per_run: int = 3
     min_stickers_to_print: int = 1
