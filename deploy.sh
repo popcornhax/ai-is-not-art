@@ -81,7 +81,7 @@ set -euo pipefail
 
 echo "  [a] Installing system packages..."
 sudo apt-get update -qq
-sudo apt-get install -y python3-venv python3-dev libusb-1.0-0
+sudo apt-get install -y python3-venv python3-dev libusb-1.0-0 python3-lgpio
 
 echo "  [b] Adding sticker to plugdev group..."
 sudo usermod -aG plugdev sticker || true
@@ -108,7 +108,7 @@ sudo systemctl restart pixcut-kiosk
 echo "  [f] ai-is-not-art venv + dependencies..."
 cd /home/sticker/ai-is-not-art
 if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
+    python3 -m venv --system-site-packages .venv
 fi
 .venv/bin/pip install --upgrade pip -q
 .venv/bin/pip install -r requirements.txt

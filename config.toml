@@ -1,5 +1,5 @@
 [openai]
-api_key = "sk-..."         # replace with your OpenAI API key
+api_key = ""         # replace with your OpenAI API key
 model = "gpt-image-1"
 size = "1024x1024"
 timeout_s = 30
