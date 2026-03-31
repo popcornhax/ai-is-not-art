@@ -1,0 +1,74 @@
+[openai]
+api_key = "sk-..."         # replace with your OpenAI API key
+model = "gpt-image-1"
+size = "1024x1024"
+timeout_s = 30
+retry_count = 2
+stickers_per_run = 3
+min_stickers_to_print = 1  # minimum successes required to proceed with print
+
+[gpio]
+button_pin = 17            # BCM; wire NO contact here, C to GND
+led_pin = 18               # BCM; WS2812 DIN — must be GPIO 18 or 12 (PWM/DMA)
+led_brightness = 128       # 0–255
+
+[pixcut]
+app_path = "/home/sticker/pixcut-app"
+log_dir = "/home/sticker/ai-is-not-art/run-logs"
+dpi = 300
+margin_mm = 2.0
+padding_mm = 3.0
+left_margin_mm = 3.0
+kp = 42
+
+[app]
+tmp_dir = "/tmp/ai-is-not-art"
+log_file = "/home/sticker/ai-is-not-art/app.log"
+prompt_history_window = 10  # avoid repeating styles/concepts within this many runs
+
+[prompts]
+styles = [
+    "punk zine collage",
+    "protest poster",
+    "vintage comic",
+    "children's illustration",
+    "corporate safety poster parody",
+    "graffiti style",
+    "screenprint poster",
+    "faux museum label",
+    "technical diagram parody",
+    "handmade outsider-art",
+    "crude digital aesthetic",
+]
+compositions = [
+    "emblem",
+    "badge",
+    "banner",
+    "protest sign",
+    "collage",
+    "icon cluster",
+    "warning label",
+    "certification seal",
+    "single subject",
+    "symbolic object",
+]
+tones = [
+    "playful",
+    "rebellious",
+    "absurd",
+    "corporate",
+    "satirical",
+    "snarky",
+    "wholesome",
+]
+concepts = [
+    "robot making art",
+    "art tools protesting",
+    "fake museum label",
+    "fake product packaging",
+    "compliance warning label",
+    "printer printing itself",
+    "human vs machine contrast",
+    "parody certification",
+    "gallery rejection scene",
+]

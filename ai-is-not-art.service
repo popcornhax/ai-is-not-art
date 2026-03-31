@@ -1,0 +1,16 @@
+[Unit]
+Description=AI Is Not Art Sticker Printer
+After=network.target pixcut-kiosk.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/home/sticker/ai-is-not-art
+ExecStart=/home/sticker/ai-is-not-art/.venv/bin/python main.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
