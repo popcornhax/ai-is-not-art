@@ -20,6 +20,8 @@ import json
 from pathlib import Path
 from typing import List
 
+from PIL import Image
+
 from config import Config
 
 log = logging.getLogger("aina.printer")
@@ -33,6 +35,7 @@ def layout_and_print(img_paths: List[Path], cfg: Config) -> bool:
     Lay out img_paths and either print (normal) or preview in kiosk (debug).
     Returns True on success, False on failure.
     """
+    img_paths = _preprocess_all(img_paths, cfg)
     if cfg.app.debug_mode:
         return _debug_preview(img_paths, cfg)
     return _do_print(img_paths, cfg)
@@ -222,6 +225,66 @@ def _save_layout(result, jpg_path: Path, plt_path: Path) -> bool:
     except Exception as exc:
         log.error("Failed to write layout files: %s", exc)
         return False
+
+
+def _preprocess_all(img_paths: List[Path], cfg: Config) -> List[Path]:
+    """Autocrop, binarize alpha, and resize each image in-place. Returns updated paths."""
+    out = []
+    for p in img_paths:
+        try:
+            result = _preprocess_sticker(p, cfg.pixcut.alpha_threshold,
+                                         cfg.pixcut.sticker_max_mm, cfg.pixcut.dpi)
+            out.append(result)
+        except Exception as exc:
+            log.warning("Preprocessing failed for %s (%s) — using original", p.name, exc)
+            out.append(p)
+    return out
+
+
+def _preprocess_sticker(path: Path, alpha_threshold: int,
+                        max_mm: float, dpi: int) -> Path:
+    """
+    1. Autocrop: trim transparent border to tight content bounding box.
+    2. Binarize alpha: pixels below threshold → 0, at or above → 255.
+       Eliminates semi-transparent drop shadows that cause bad cut paths.
+    3. Resize: scale so the longer dimension equals max_mm at the given DPI.
+    Saves over the original file and returns the same path.
+    """
+    img = Image.open(path).convert("RGBA")
+    r, g, b, alpha = img.split()
+
+    # 1. Autocrop to tight content bounding box.
+    bbox = alpha.getbbox()
+    if bbox:
+        img = img.crop(bbox)
+        r, g, b, alpha = img.split()
+    else:
+        log.warning("%s: alpha channel is entirely transparent after crop", path.name)
+
+    # 2. Binarize alpha.
+    alpha = alpha.point(lambda v: 255 if v >= alpha_threshold else 0)
+    img = Image.merge("RGBA", (r, g, b, alpha))
+
+    # After binarize, re-crop to remove any newly emptied border rows/cols.
+    bbox2 = alpha.getbbox()
+    if bbox2:
+        img = img.crop(bbox2)
+
+    # 3. Resize to max physical size.
+    max_px = int(round(max_mm * dpi / 25.4))
+    w, h = img.size
+    if w > 0 and h > 0:
+        scale = max_px / max(w, h)
+        if scale < 1.0:  # only shrink, never enlarge
+            new_w = max(1, int(round(w * scale)))
+            new_h = max(1, int(round(h * scale)))
+            img = img.resize((new_w, new_h), Image.LANCZOS)
+
+    log.info("Preprocessed %s: %dx%d → %dx%d (threshold=%d, max=%dmm@%ddpi)",
+             path.name, w, h, img.width, img.height, alpha_threshold, max_mm, dpi)
+
+    img.save(str(path), "PNG")
+    return path
 
 
 def _inject_pixcut_path(app_path: str) -> None:

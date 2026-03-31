@@ -22,14 +22,21 @@ log = logging.getLogger("aina.prompt")
 
 PROMPT_TEMPLATE = """\
 {style} sticker design. {composition} composition. {tone} tone. Concept: {concept}.
-The sticker must display the text "AI is not art" prominently.
-The sticker must also include the subtext "AI generated image".
-Transparent background — no background color, gradient, or fill outside the sticker.
-Single unified sticker silhouette with one continuous outer border (white or clearly defined).
-No detached floating elements, no internal islands that could become separate cut paths.
-No shadows, glow, or gradients outside the sticker boundary.
-Flat top-down printable composition, suitable for physical sticker printing and die-cutting.
-All text and design elements contained within the main sticker shape.\
+
+VISUAL REQUIREMENTS — make this striking and memorable:
+- Bold, high-contrast colors. Strong graphic impact. Not flat or boring.
+- Rich detail inside the sticker: texture, depth, dramatic lighting or shading are encouraged.
+- Visually interesting and energetic — this should look great as a physical sticker.
+- The text "AI is not art" must appear prominently and be clearly legible.
+- The subtext "AI generated image" must also appear, smaller but readable.
+
+CUTLINE REQUIREMENTS — critical for physical die-cutting:
+- Transparent background. Absolutely no color, fill, or gradient outside the sticker boundary.
+- Single unified silhouette with one continuous hard outer edge.
+- The outer edge must be fully opaque — no feathering, anti-aliasing halos, or semi-transparent pixels at the boundary.
+- No drop shadows, outer glow, or any effect that extends outside the sticker shape.
+- No detached floating elements. No internal transparent islands. One solid shape.
+- All artwork, text, and decoration contained entirely within the sticker silhouette.\
 """
 
 

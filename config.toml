@@ -20,6 +20,8 @@ margin_mm = 2.0
 padding_mm = 3.0
 left_margin_mm = 3.0
 kp = 42
+sticker_max_mm = 50.0   # max sticker dimension (width or height) after resize
+alpha_threshold = 128   # alpha values below this become fully transparent (kills drop shadows)
 
 [app]
 tmp_dir = "/tmp/ai-is-not-art"

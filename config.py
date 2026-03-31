@@ -45,6 +45,8 @@ class PixcutConfig:
     padding_mm: float = 3.0
     left_margin_mm: float = 3.0
     kp: int = 42
+    sticker_max_mm: float = 50.0    # max sticker dimension after resize
+    alpha_threshold: int = 128      # alpha below this → fully transparent (removes drop shadows)
 
 
 @dataclass
