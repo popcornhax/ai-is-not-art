@@ -2,8 +2,8 @@
 Hardware abstraction: WS2812 button LED (rpi_ws281x) + momentary button (gpiozero).
 
 LED states:
-  idle    — off
-  working — slow white pulse (~0.5 Hz)
+  idle    — dim white (10% brightness, steady)
+  working — slow RGB hue fade cycle
   success — 3× fast green flashes
   error   — 5× fast red flashes
 
@@ -15,17 +15,29 @@ Button is read via gpiozero with internal pull-up; wired NO→GPIO, C→GND.
 from __future__ import annotations
 
 import logging
+import math
 import threading
 import time
 from typing import Callable, Optional
 
 log = logging.getLogger("aina.hardware")
 
-# Colour helpers
-_OFF = (0, 0, 0)
-_WHITE = (255, 255, 255)
 _GREEN = (0, 255, 0)
 _RED = (255, 0, 0)
+
+
+def _hsv_to_rgb(h: float, s: float, v: float) -> tuple[int, int, int]:
+    """h in [0,1), s and v in [0,1]. Returns (r, g, b) each 0-255."""
+    i = int(h * 6)
+    f = h * 6 - i
+    p = v * (1 - s)
+    q = v * (1 - f * s)
+    t = v * (1 - (1 - f) * s)
+    r, g, b = [
+        (v, t, p), (q, v, p), (p, v, t),
+        (p, q, v), (t, p, v), (v, p, q),
+    ][i % 6]
+    return int(r * 255), int(g * 255), int(b * 255)
 
 
 class _MockLED:
@@ -34,7 +46,7 @@ class _MockLED:
     def __init__(self, pin: int, brightness: int):
         log.warning("rpi_ws281x not available — LED is simulated (pin %d)", pin)
 
-    def set_color(self, r: int, g: int, b: int, brightness: int) -> None:
+    def set_color(self, r: int, g: int, b: int, brightness: Optional[int] = None) -> None:
         pass
 
     def clear(self) -> None:
@@ -142,35 +154,36 @@ class LEDController:
             self._change.clear()
 
             if state == "idle":
-                self._led.clear()
-                self._change.wait()
+                self._idle_white()
 
             elif state == "working":
-                self._pulse_white()
+                self._rgb_fade()
 
             elif state == "success":
                 self._flash(_GREEN, count=3, on=0.12, off=0.1)
-                self._led.clear()
                 self._set_state("idle")
 
             elif state == "error":
                 self._flash(_RED, count=5, on=0.08, off=0.08)
-                self._led.clear()
                 self._set_state("idle")
 
-    def _pulse_white(self) -> None:
-        """Sine-wave brightness pulse. Runs until state changes."""
-        import math
+    def _idle_white(self) -> None:
+        """Steady dim white. Blocks until state changes."""
+        idle_brightness = max(1, self._brightness // 10)
+        self._led.set_color(255, 255, 255, idle_brightness)
+        self._change.wait()
+
+    def _rgb_fade(self) -> None:
+        """Smooth full-spectrum hue cycle. Runs until state changes."""
+        steps = 120        # steps per full hue revolution
+        period_s = 3.0     # seconds for one full colour cycle
         step = 0
-        steps = 60  # full cycle
         while self._state == "working" and not self._stop.is_set():
-            t = step / steps
-            # sin goes 0→1→0 over one cycle
-            bright = int(self._brightness * (0.5 - 0.5 * math.cos(2 * math.pi * t)))
-            r, g, b = _WHITE
-            self._led.set_color(r, g, b, bright)
-            time.sleep(1.0 / steps / 0.5)  # period = 2 s
-            step = (step + 1) % steps
+            hue = (step % steps) / steps
+            r, g, b = _hsv_to_rgb(hue, 1.0, 1.0)
+            self._led.set_color(r, g, b, self._brightness)
+            time.sleep(period_s / steps)
+            step += 1
 
     def _flash(self, color: tuple, count: int, on: float, off: float) -> None:
         r, g, b = color
