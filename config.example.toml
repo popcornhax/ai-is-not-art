@@ -1,0 +1,35 @@
+# Copy this file to config.toml and set api_key locally.
+# config.toml is ignored by Git because it may contain secrets.
+
+[openai]
+api_key = ""
+model = "gpt-image-1"
+size = "1024x1024"
+timeout_s = 120
+retry_count = 2
+stickers_per_run = 2
+min_stickers_to_print = 1
+
+[gpio]
+button_pin = 17
+led_pin = 18
+led_brightness = 255
+
+[pixcut]
+app_path = "/home/pi/pixcut-app"
+log_dir = "/home/pi/ai-is-not-art/run-logs"
+dpi = 300
+margin_mm = 2.0
+padding_mm = 2.0
+left_margin_mm = 5.0
+kp = 35
+sticker_max_mm = 65
+alpha_threshold = 128
+bg_image_path = ""
+
+[app]
+tmp_dir = "/dev/shm/ai-is-not-art"
+log_file = "/home/pi/ai-is-not-art/app.log"
+prompt_history_window = 25
+debug_mode = false
+kiosk_url = "http://localhost:8000"

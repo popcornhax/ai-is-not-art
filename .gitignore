@@ -1,0 +1,16 @@
+# Local secrets and machine-specific configuration
+config.toml
+.env
+.env.*
+!.env.example
+
+# Python and runtime artifacts
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+run-logs/
+output/
+
+# Operating-system files
+.DS_Store
