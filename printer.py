@@ -89,7 +89,7 @@ def _do_print(img_paths: List[Path], cfg: Config) -> bool:
             logger=logger,
             jpg_path=jpg_path,
             plt_path=plt_path,
-            job_cfg=JobConfig(kp=cfg.pixcut.kp),
+            job_cfg=JobConfig(),
             mode="combo",
         )
     except Exception as exc:
@@ -193,6 +193,7 @@ def _layout(img_paths: List[Path], cfg: Config):
         return None
 
     log.info("Laying out %d sticker(s)…", len(img_paths))
+    bg_path = Path(cfg.pixcut.bg_image_path) if cfg.pixcut.bg_image_path else None
     try:
         results = process_images(
             img_paths,
@@ -203,6 +204,7 @@ def _layout(img_paths: List[Path], cfg: Config):
             kp=cfg.pixcut.kp,
             paginate=False,
             bg_white=False,
+            bg_image_path=bg_path,
         )
     except Exception as exc:
         log.error("Layout failed: %s", exc)

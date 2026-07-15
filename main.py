@@ -15,6 +15,7 @@ import asyncio
 import logging
 import shutil
 import signal
+import subprocess
 import threading
 import time
 from pathlib import Path
@@ -46,6 +47,31 @@ def _setup_logging(cfg: Config) -> None:
 
 
 log = logging.getLogger("aina.main")
+
+
+def _secure_delete(path: Path) -> None:
+    """Overwrite file contents before unlinking.
+
+    SD cards use wear leveling so shred cannot guarantee the original flash
+    cells are overwritten, but it raises the bar significantly. The real
+    defense is keeping tmp_dir on a tmpfs (e.g. /dev/shm) so images never
+    reach flash storage at all.
+    """
+    try:
+        subprocess.run(
+            ["shred", "-uz", "--iterations=1", str(path)],
+            check=True,
+            capture_output=True,
+        )
+        log.debug("Shredded %s", path)
+    except (FileNotFoundError, subprocess.CalledProcessError) as exc:
+        # shred unavailable or failed — fall back to plain unlink
+        log.warning("shred failed for %s (%s), falling back to unlink", path, exc)
+        try:
+            path.unlink(missing_ok=True)
+        except Exception as exc2:
+            log.warning("Could not delete %s: %s", path, exc2)
+
 
 # ---------------------------------------------------------------------------
 # Application state machine
@@ -164,11 +190,7 @@ class App:
         #    In debug mode keep them so they can be inspected.
         if not cfg.app.debug_mode:
             for p in good:
-                try:
-                    p.unlink()
-                    log.debug("Deleted %s", p)
-                except Exception as exc:
-                    log.warning("Could not delete %s: %s", p, exc)
+                _secure_delete(p)
         else:
             log.info("[DEBUG] Keeping generated images in %s for inspection", cfg.app.tmp_dir)
 
@@ -181,6 +203,9 @@ class App:
     def _clear_tmp(self) -> None:
         tmp = Path(self._cfg.app.tmp_dir)
         if tmp.exists():
+            for p in tmp.rglob("*"):
+                if p.is_file():
+                    _secure_delete(p)
             shutil.rmtree(tmp, ignore_errors=True)
             log.debug("Cleared %s", tmp)
 

@@ -47,11 +47,12 @@ class PixcutConfig:
     kp: int = 42
     sticker_max_mm: float = 50.0    # max sticker dimension after resize
     alpha_threshold: int = 128      # alpha below this → fully transparent (removes drop shadows)
+    bg_image_path: str = ""         # path to background image (print layer only, no cut); empty = none
 
 
 @dataclass
 class AppConfig:
-    tmp_dir: str = "/tmp/ai-is-not-art"
+    tmp_dir: str = "/dev/shm/ai-is-not-art"
     log_file: str = "/home/sticker/ai-is-not-art/app.log"
     prompt_history_window: int = 10
     debug_mode: bool = False
@@ -93,6 +94,17 @@ class PromptConfig:
         "parody certification",
         "gallery rejection scene",
     ])
+    concept_families: List[str] = field(default_factory=list)
+    sticker_shapes: List[str] = field(default_factory=list)
+    wildcards: List[str] = field(default_factory=list)
+    materialities: List[str] = field(default_factory=list)
+    eras: List[str] = field(default_factory=list)
+    render_modes: List[str] = field(default_factory=list)
+    text_treatments: List[str] = field(default_factory=list)
+    tensions: List[str] = field(default_factory=list)
+    anti_defaults: List[str] = field(default_factory=list)
+    political_modes: List[str] = field(default_factory=list)
+    rare_modifiers: List[str] = field(default_factory=list)
 
 
 @dataclass
